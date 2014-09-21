@@ -1,42 +1,47 @@
 
 ## The functions in this file create and cache a matrix and its inverse.
 
-
-## makeCacheMatrix creates the matrix to be stored.
-#2345678901234567890123456789012345678901234567890123456789012345678901234567890
 makeCacheMatrix <- function(x = matrix()) {
-    inv <- NULL
+    ## makeCacheMatrix creates the matrix to be stored.
     get <- function() { x }
     getinverse <- function() { inv }
+    is_changed <- function() { changed }
     set <- function(y) {
         x <<- y
         m <<- NULL
+        changed <<- TRUE
     }
-    setinverse <- function(new_inv) { inv <<- new_inv }
+    setinverse <- function(new_inv) { 
+        inv <<- new_inv
+        changed <<- FALSE
+    }
 
+    inv <- NULL
+    changed <- FALSE
     list(set = set, get = get, 
          setinverse = setinverse,
-         getinverse = getinverse) 
+         getinverse = getinverse,
+         is_changed = is_changed) 
 }
 
 
-## cacheSolve returns the inverse of the cached matrix.
-
 cacheSolve <- function(x, ...) {
-    ## This function returns a matrix that is the inverse of 'x'
-    
-  message("entering cacheSolve")
+    ## cacheSolve returns the inverse of the matrix x.  If the inverse is already
+    ## cached, that value is returned; otherwise, the inverse is computed and cached.
+
     inv_matrix <- x$getinverse()
-    ## Check to see if the inverse has already been calculated.
-    if (!is.null(inv_matrix)) {
+    ## Check to see if the matrix has been changed.
+    mat_changed <- x$is_changed()
+    ## Find out if 
+    use_cached <- !mat_changed & !is.null(inv_matrix)
+    if (use_cached) {
         ## Return the pre-calculated result.
         message("getting cached data")
         return(inv_matrix)
     }
+    ## The inverse is computed and cached and the result returned.
     orig_mat <- x$get()
-    inv_matrix <-solve(orig_mat)
+    inv_matrix <- solve(orig_mat)
     x$setinverse(inv_matrix)
     inv_matrix
-    ## Check to see if the matrix has been changed.
-    ## The inverse is computed and cached and the result returned.
 }
